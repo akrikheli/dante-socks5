@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  socks5-proxy:
+    build:
+      context: .
+      args:
+        - SOCKS_USER=${PROXY_USER}
+        - SOCKS_PASS=${PROXY_PASS}
+    container_name: dante-socks5
+    restart: always
+    ports:
+      - "50107:50107"
+    # Пробрасываем наш чистый конфиг внутрь
+    volumes:
+      - ./sockd.conf:/etc/sockd.conf:ro
+    # Лимиты на память и оптимизация сети
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    sysctls:
+      - net.ipv4.tcp_fin_timeout=15
+      - net.ipv4.tcp_tw_reuse=1
+      - net.ipv4.tcp_keepalive_time=300
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
