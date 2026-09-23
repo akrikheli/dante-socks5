@@ -1,8 +1,16 @@
-FROM wernight/dante:latest
+FROM debian:bookworm-slim
 
-ARG SOCKS_USER
-ARG SOCKS_PASS
+# dante-server — официальный пакет Debian (Dante 1.4.x, версия контролируется
+# меткой базового образа); netcat-openbsd нужен для TCP-healthcheck из compose
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        dante-server \
+        netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN adduser -h /dev/null -s /sbin/nologin -D $SOCKS_USER
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN echo "$SOCKS_USER:$SOCKS_PASS" | chpasswd
+EXPOSE 50107
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

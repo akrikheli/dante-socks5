@@ -4,11 +4,17 @@ services:
   socks5-proxy:
     build:
       context: .
-      args:
-        - SOCKS_USER=${PROXY_USER}
-        - SOCKS_PASS=${PROXY_PASS}
+    environment:
+      - SOCKS_USER=${PROXY_USER}
+      - SOCKS_PASS=${PROXY_PASS}
     container_name: dante-socks5
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 50107"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     ports:
       - "50107:50107"
     # Пробрасываем наш чистый конфиг внутрь
